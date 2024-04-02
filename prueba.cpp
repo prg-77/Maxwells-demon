@@ -7,6 +7,8 @@ int main()
     int numero;
     cout << "Hola Mundo" << endl;
     cout << "Hola Mundo" << endl;
+    cout << "Hola Mundo" << endl;
+    cout << "Hola Mundo" << endl;
     cin >> numero;
     return 0;
 }
