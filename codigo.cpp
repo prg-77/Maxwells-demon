@@ -7,33 +7,39 @@
 
 #define N1 3 //Número de celdas horizontales
 #define N2 3 //Número de celdas verticales
-#define num N1*N2/1 //Número de partículas   (La división es entera)
+#define num N1*N2/3 //Número de partículas   (La división es entera)
 #define num_pasos 100 //Número de pasos
 
 using namespace std;
 
-void inicializar_posiciones(int posiciones[][2]);
-void actualizar_posiciones(int posiciones[][2]);
+void inicializar_posiciones(int posiciones[][2], ofstream& datos_posiciones);
+void actualizar_posiciones(int posiciones[][2], ofstream& datos_posiciones);
 bool rodeado(int posiciones[][2], int i);
 
 int main()
 {
     int posiciones[num][2];
+    ofstream parametros_iniciales, datos_posiciones;
 
-    inicializar_posiciones(posiciones);
+    parametros_iniciales.open("parametros_iniciales.dat");
+    parametros_iniciales << "#N1 N2 num num_pasos" << endl;
+    parametros_iniciales << N1 << " , " << N2 << " , " << num << " , " << num_pasos << endl;
+    parametros_iniciales.close();
+
+    datos_posiciones.open("posiciones.dat");
+    inicializar_posiciones(posiciones, datos_posiciones);
 
     for (int i = 0; i < num_pasos; i++)
     {
-        cout << endl;
-        actualizar_posiciones(posiciones);
+        datos_posiciones << endl;
+        actualizar_posiciones(posiciones, datos_posiciones);
     }
 
+    datos_posiciones.close();
     return 0;
-
-
 }
 
-void inicializar_posiciones(int posiciones[][2])
+void inicializar_posiciones(int posiciones[][2], ofstream& datos_posiciones)
 {
     bool diferente;
 
@@ -58,11 +64,11 @@ void inicializar_posiciones(int posiciones[][2])
                 }
             }
         }
-        cout << posiciones[i][0]+1 << " " << posiciones[i][1]+1 << endl;
+        datos_posiciones << posiciones[i][0]+1 << " , " << posiciones[i][1]+1 << endl;
     } 
 }
 
-void actualizar_posiciones(int posiciones[][2])
+void actualizar_posiciones(int posiciones[][2], ofstream& datos_posiciones)
 {
     double r;
     bool ocupado;
@@ -72,7 +78,7 @@ void actualizar_posiciones(int posiciones[][2])
     {
         if (rodeado(posiciones, i))
         {
-            cout << posiciones[i][0]+1 << " " << posiciones[i][1]+1 << endl;
+            datos_posiciones << posiciones[i][0]+1 << " , " << posiciones[i][1]+1 << endl;
             continue;
         }
         
@@ -123,7 +129,7 @@ void actualizar_posiciones(int posiciones[][2])
         }
         posiciones[i][0] = posiciones_aux[0];
         posiciones[i][1] = posiciones_aux[1];
-        cout << posiciones[i][0]+1 << " " << posiciones[i][1]+1 << endl;
+        datos_posiciones << posiciones[i][0]+1 << " , " << posiciones[i][1]+1 << endl;
     }
 }
 
