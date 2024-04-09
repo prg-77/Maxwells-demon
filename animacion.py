@@ -1,146 +1,110 @@
-import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.patches import Circle
+import numpy as np
 
+#Nombres de los ficheros de entrada y salida de datos
+file_in = "posiciones.dat"
+file_out = "Demon_animation"
 
-#Tengo una sola partícula y genero aleatoriamente la posición
-#x = np.random.rand(100)
-#y = np.random.rand(100)
+# Límites de los ejes X e Y
+x_min = -0.5
+x_max = 4.5
+y_min = -0.5
+y_max = 4.5
 
+#Tiempo entre fotogramas
+interval = 100
 
+#Guardar en archivo de salida
+save_to_file = False 
 
-datos = 'posiciones.dat'
+#Calidad
+dpi = 150 
 
-#Leo el fichero
-with open(datos, "r") as f:
-    datos_str = f.read()
+#Radio de las partículas
+part_radius = 0.1 
 
-#Inicializo la lista con las posiciones
-posiciones = list()
+with open(file_in, "r") as f:
+    data_str = f.read()
 
-print(posiciones)
+positions_data = list()
 
 #Leo los datos y los almaceno en una lista, primero se indica que cada frame se separa con un doble salto de línea
-for un_frame_str in datos_str.split("\n\n"):
-    posicion = list()
+for frame_data_str in data_str.split("\n\n"):
 
+    frame_data = list()
     #Cada posición de cada partícula se separa por un salto de línea
-    for part_pos_str in un_frame_str.split("\n"):
-
-        # Lee la componente x e y de cada partícula
-        part_pos = np.fromstring(part_pos_str, sep=" , ")
-        #print(part_pos)
-        #x1, y1 = part_pos
-        #print(x1)
-        #print(y1)
-
-        #Añado la partícula a la lista de posiciones
+    for part_pos_str in frame_data_str.split("\n"):
+        
+        # Lee la componente x e y de la línea
+        part_pos = np.fromstring(part_pos_str, sep=",")
+        
         if part_pos.size > 0:
-            posicion.append(np.fromstring(part_pos_str, sep=" , "))
+            frame_data.append(np.fromstring(part_pos_str, sep=","))
 
-    # Añade los datos de este fotograma a la lista
-    posiciones.append(posicion)
+    # Añado a la variable donde se almacenan las posiciones de todas las partículas
+    positions_data.append(frame_data)
 
-#Obtenemos el número de partículas que tenemos
-npart = len(posiciones[0])
-#print(x1)
-print(posiciones[10])
-#print('\n')
-#print(npart)
-interval = 10
+#Obtengo el número de partículas que tengo
+nparts = len(positions_data[0])
+print(nparts)
 
+#Creamos la animación
 fig, ax = plt.subplots()
 
-ax.set_xlim(-0.5, 9.5)
-ax.set_ylim(-0.5, 9.5)
+ax.axis("equal")
+ax.set_xlim(x_min, x_max)
+ax.set_ylim(y_min, y_max)
 
-##########################################
+#Si se ha introducido un radio, se dice que todas las partículas tienen ese radio
+if not hasattr(part_radius, "__iter__"):
+    part_radius = part_radius*np.ones(nparts)
+#Si se ha introducido distintos radios para cada partícula, se comrpueba que se hayan introducido tantos radios como partículas
+else:
+    if not nparts == len(part_radius):
+        raise ValueError(
+                "El número de radios especificados no coincide con el número "
+                "de partículas")
 
-puntos_part = list()
+#Variable para almacenar las posiciones de cada partícula en un frame
+part_points = list()
 
-x = []
-y = []
+#Obtenemos las posiciones iniciales de cada partícula
+for part_pos, radius in zip(positions_data[0], part_radius):
+    x, y = part_pos
+    #planet_point, = ax.plot(x, y, "o", markersize=10)
+    part_point = Circle((x, y), radius, color='black')
+    ax.add_artist(part_point)
+    part_points.append(part_point)
 
-def initial_data():
-    for part_pos in (posiciones[0]):
     
+#Función para actualizar las posiciones de cada partícula
+def update(j_frame, frames_data, part_points):
+    for j_planet, part_pos in enumerate(frames_data[j_frame]):
         x, y = part_pos
-        #print(part_pos[0])
+        part_points[j_planet].center = (x, y)
 
-        punto_part, = ax.plot(x, y, "o", markersize=10, color='tab:blue')
-        #ax.add_artist(punto_part)
-        puntos_part.append(punto_part)
+    return part_points
 
-        animated_plot, = ax.plot(x, y, 'o', markersize=5, color='black')
-    
-    return animated_plot
-
-animated_plot, = ax.plot(x, y, 'o', markersize=5, color='black')
-
-
-def update_data (frames):
-    #for j, part_pos in enumerate(posiciones[frames]):
-    for part_pos in (posiciones[frames]):
-        #Hace falta meter un índice para tener en cuenta que hay más de una partícula
-        x, y = part_pos
-        print(x[0])
-        for i in range(npart):
-            animated_plot[i].set_data(x, y)
-        #animated_plot.set_data(x, y)
-        #animated_plot, = ax.plot(x, y, 'o', markersize=5, color='black')
-        #puntos_part[j].center = (x, y)
-        
-    return animated_plot
-
-animation = FuncAnimation(fig=fig,
-                          func = update_data,
-                          frames=len(posiciones),
-                          init_func=initial_data,
-                          interval=100)
-
-
-plt.grid()
-plt.show()
-
-
-'''
-# Función que actualiza la posición de los planetas en la animación 
-def update(j_frame, posiciones, puntos_part):
-    # Actualiza la posición del correspondiente a cada planeta
-    for j_part, part_pos in enumerate(posiciones[j_frame]):
-        x, y = part_pos
-        puntos_part[j_part].center = (x, y)
-
-    return puntos_part
-
+#Función para inicializar la animación a las posiciones iniciales obtenidas anteriormente
 def init_anim():
-    return puntos_part
+    return part_points
 
-# Calcula el nº de frames
-nframes = len(posiciones)
-print(nframes)
+nframes = len(positions_data)
 
 # Si hay más de un instante de tiempo, genera la animación
 if nframes > 1:
-    # Info sobre FuncAnimation: https://matplotlib.org/stable/api/animation_api.html
     animation = FuncAnimation(
             fig, update, init_func=init_anim,
-            fargs=(posiciones, puntos_part),
-            frames=len(posiciones), blit=True, interval=interval)
+            fargs=(positions_data, part_points),
+            frames=len(positions_data), blit=True, interval=interval)
 
-    plt.show()
-'''
-
-
-
-
-
-
-'''
     # Muestra por pantalla o guarda según parámetros
     if save_to_file:
         animation.save("{}.mp4".format(file_out), dpi=dpi)
     else:
+        plt.grid()
         plt.show()
 # En caso contrario, muestra o guarda una imagen
 else:
@@ -149,32 +113,3 @@ else:
         fig.savefig("{}.pdf".format(file_out))
     else:
         plt.show()
-
-'''
-
-
-
-
-
-
-
-
-
-'''
-animated_plot, = ax.plot([], [], 'o', markersize=5, color='black')
-
-def update_data (frame):
-    animated_plot.set_data([x[frame]], [y[frame]])
-
-    return animated_plot
-
-animation = FuncAnimation(fig=fig,
-                          func = update_data,
-                          frames=len(x),
-                          interval=100)
-
-
-plt.grid()
-plt.show()
-
-'''
