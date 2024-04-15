@@ -87,7 +87,7 @@ def leo_archivos (archivo):
                 frame_data.append(np.fromstring(part_pos_str, sep=","))
 
         positions_data.append(frame_data)
-        
+
     return positions_data
 
 for i in range(1, 4):
@@ -97,13 +97,24 @@ for i in range(1, 4):
     aux.append(vari)
         
 print('printeo el auxiliar')
-print(aux)
+#print(aux)
 #Obtengo el número de partículas que tengo
+
+positions = []
+for i in range(3):
+    cont = []
+    for j in range(N_iter):
+        cont.append(aux[0][j + i*N_iter +1])
+    positions.append(cont)
+
+print(positions[1][0])
+
 nparts = []
 for i in range(0, 3):
-    nparts.append(len(aux[i][0]))
+    nparts.append(len(positions[i][0]))
 
 print(nparts)
+
 
 part_radius = []
 for i in range(n_arch):
@@ -139,7 +150,7 @@ aux2 = []
 
 for i in range(n_arch):
     part_points = list()
-    for part_pos, radius in zip(aux[i], part_radius[i]):
+    for part_pos, radius in zip(positions[i][0], part_radius[i]):
         #print(part_pos)
         x, y = part_pos
     #planet_point, = ax.plot(x, y, "o", markersize=10)
@@ -152,27 +163,31 @@ print(aux2)
     
 #Función para actualizar las posiciones de cada partícula
 def update(j_frame, frames_data, part_points):
-    aux3 = []
+    part_points = []
     for i in range(n_arch):
-        part_points = list()
-        for j_planet, part_pos in enumerate(frames_data[j_frame]):
+        part_points_ = list()
+        for j_part, part_pos in enumerate(frames_data[j_frame]):
             x, y = part_pos
-            part_points[j_planet].center = (x, y)
-        aux3.append(part_points[j_planet])
-    return aux3
+            #part_points[j_part].center = (x, y)
+            part_points_[j_part] = Circle((x, y), radius, color='black')
+        part_points.append(part_points_)
+        print(part_points)
+    return part_points
+
+
 
 #Función para inicializar la animación a las posiciones iniciales obtenidas anteriormente
 def init_anim():
     return aux2
 
-nframes = len(aux)
+nframes = len(positions[0])
 
 # Si hay más de un instante de tiempo, genera la animación
 if nframes > 1:
     animation = FuncAnimation(
             fig, update, init_func=init_anim,
             fargs=(aux, part_points),
-            frames=len(aux), blit=True, interval=interval)
+            frames=len(aux[0]), blit=True, interval=interval)
 
     # Muestra por pantalla o guarda según parámetros
     if save_to_file:
