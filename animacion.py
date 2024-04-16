@@ -40,7 +40,7 @@ for file in os.listdir():
 #Obtengo el número de archivos de datos de partículas
 n_arch = len(archivos) - 1
 
-file_in = "posiciones.dat"
+#file_in = "posiciones.dat"
 file_out = "Demon_animation"
 
 x_min = -0.5
@@ -51,7 +51,7 @@ y_max = 5.5
 N_iter = 100
 
 #Tiempo entre fotogramas
-interval = 100
+interval = 500
 
 #Guardar en archivo de salida
 save_to_file = False 
@@ -62,13 +62,12 @@ dpi = 150
 #Radio de las partículas
 #part_radius = 0.1 
 
-with open(file_in, "r") as f:
-    data_str = f.read()
+#with open(file_in, "r") as f:
+#    data_str = f.read()
 
 #positions_data = [[0 for j in range(N_iter)] for k in range(n_arch)]
 positions_data = []
 aux = []
-aux_ = []
 #Leo los datos y los almaceno en una lista, primero se indica que cada frame se separa con un doble salto de línea
 def leo_archivos (archivo):
     #print(archivo)
@@ -148,50 +147,76 @@ for i in range(n_arch):
 #Obtenemos las posiciones iniciales de cada partícula
 aux2 = []
 
-for i in range(n_arch):
-    part_points = list()
-    for part_pos, radius in zip(positions[i][0], part_radius[i]):
-        #print(part_pos)
-        x, y = part_pos
+part_points0 = []
+for part_pos, radius in zip(positions[0][0], part_radius[0]):
+    x, y = part_pos
     #planet_point, = ax.plot(x, y, "o", markersize=10)
-        part_point = Circle((x, y), radius, color='black')
-        ax.add_artist(part_point)
-        part_points.append(part_point)
-    aux2.append(part_points)
+    part_point = Circle((x, y), radius, color='black')
+    ax.add_artist(part_point)
+    part_points0.append(part_point)
 
-print(aux2)
-    
+part_points1 = []
+for part_pos, radius in zip(positions[1][0], part_radius[1]):
+    x, y = part_pos
+    #planet_point, = ax.plot(x, y, "o", markersize=10)
+    part_point = Circle((x, y), radius, color='tab:blue')
+    ax.add_artist(part_point)
+    part_points1.append(part_point)
+
+part_points2 = []
+for part_pos, radius in zip(positions[2][0], part_radius[1]):
+    x, y = part_pos
+    #planet_point, = ax.plot(x, y, "o", markersize=10)
+    part_point = Circle((x, y), radius, color='tab:red')
+    ax.add_artist(part_point)
+    part_points2.append(part_point)
+
 #Función para actualizar las posiciones de cada partícula
-def update(j_frame, frames_data, part_points):
-    part_points = []
-    for i in range(n_arch):
-        part_points_ = list()
-        for j_part, part_pos in enumerate(frames_data[j_frame]):
-            x, y = part_pos
-            #part_points[j_part].center = (x, y)
-            part_points_[j_part] = Circle((x, y), radius, color='black')
-        part_points.append(part_points_)
-        print(part_points)
+def update0(j_frame, frames_data, part_points):
+    for j_part, part_pos in enumerate(frames_data[j_frame]):
+        x, y = part_pos
+        part_points[j_part].center = (x, y)
+
     return part_points
-
-
-
-#Función para inicializar la animación a las posiciones iniciales obtenidas anteriormente
-def init_anim():
-    return aux2
 
 nframes = len(positions[0])
 
+
+def init_anim0():
+    return part_points0
+
+def init_anim1():
+    return part_points1
+
+def init_anim2():
+    return part_points2
+
 # Si hay más de un instante de tiempo, genera la animación
 if nframes > 1:
-    animation = FuncAnimation(
-            fig, update, init_func=init_anim,
-            fargs=(aux, part_points),
-            frames=len(aux[0]), blit=True, interval=interval)
-
+    animation0 = FuncAnimation(
+            fig, update0, init_func=init_anim0,
+            fargs=(positions[0], part_points0),
+            frames=len(positions[0]), blit=True, interval=interval)
+    
+    animation1 = FuncAnimation(
+            fig, update0, init_func=init_anim1,
+            fargs=(positions[1], part_points1),
+            frames=len(positions[0]), blit=True, interval=interval)
+    
+    animation2 = FuncAnimation(
+            fig, update0, init_func=init_anim2,
+            fargs=(positions[2], part_points2),
+            frames=len(positions[0]), blit=True, interval=interval)
+    
+    '''def updateAll (nframes):
+        a = update0
+        b = update1
+        c = update2
+        return a+b+c'''
+    
     # Muestra por pantalla o guarda según parámetros
     if save_to_file:
-        animation.save("{}.mp4".format(file_out), dpi=dpi)
+        animation0.save("{}.mp4".format(file_out), dpi=dpi)
     else:
         plt.grid()
         plt.show()
