@@ -9,25 +9,34 @@
 using namespace std;
 
 void inicializar_posiciones(int posiciones[][2], int N[2], int num[], int tipos, ofstream* datos_posiciones);
-void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones);
-bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos);
+void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera);
+bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos, bool barrera_abierta, double pos_barrera);
 int suma_array(int array[], int n);
+double posicion_barrera(int N);
+bool barrera(int posiciones[][2], int N[2], int num[], double pos_barrera, int v[], int izqda); // Función hecha solo para tipos = 2.
+bool demonio(int posicion_vieja, int posicion_nueva, double pos_barrera); // Función hecha solo para tipos = 2. 
 
 int main()
 {
     int N[2], tipos, num_pasos;
+    bool barrera_abierta;
 
-    N[0] = 4; // Número de celdas horizontales
-    N[1] = 4; // Número de celdas verticales
+    N[0] = 100; // Número de celdas horizontales
+    N[1] = 100; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
-    num_pasos = 100; // Número de pasos
+    num_pasos = 5000; // Número de pasos
 
     int num[tipos], v[tipos];
+    double pos_barrera;
+
+    pos_barrera = posicion_barrera(N[0]); //Posición de la barrera
+    cout << pos_barrera << endl;
+    cout << endl;
 
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 1; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 10; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -72,7 +81,10 @@ int main()
         {
             datos_posiciones[j] << endl;
         }
-        actualizar_posiciones(posiciones, N, num, v, tipos, datos_posiciones);
+        barrera_abierta = barrera(posiciones, N, num, pos_barrera, v, 0);
+        cout << barrera_abierta << endl;
+        cout << endl;
+        actualizar_posiciones(posiciones, N, num, v, tipos, datos_posiciones, barrera_abierta, pos_barrera);
     }
 
     for (int i = 0; i < tipos; i++)
@@ -119,7 +131,7 @@ void inicializar_posiciones(int posiciones[][2], int N[2], int num[], int tipos,
     }
 }
 
-void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones)
+void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera)
 {
     double r, posiciones_aux[2];
     bool ocupado;
@@ -129,7 +141,7 @@ void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], in
     {
         for (int i = contador; i < suma_array(num,j+1); i++)
         {
-            if (rodeado(posiciones, N, num, i, v[j], tipos))
+            if (rodeado(posiciones, N, num, i, v[j], tipos, barrera_abierta, pos_barrera))
             {
                 datos_posiciones[j] << posiciones[i][0]+1 << " , " << posiciones[i][1]+1 << endl;
                 continue;
@@ -165,6 +177,15 @@ void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], in
                     posiciones_aux[1] = posiciones[i][1] - v[j];
                 }
 
+                if (barrera_abierta == false)
+                {
+                    if (demonio(posiciones[i][0], posiciones_aux[0], pos_barrera) == true)
+                    {
+                        ocupado = true;
+                        continue;
+                    }
+                }
+
                 if (posiciones_aux[0] < 0 || posiciones_aux[0] >= N[0] || posiciones_aux[1] < 0 || posiciones_aux[1] >= N[1])
                 {
                     ocupado = true;
@@ -188,7 +209,7 @@ void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], in
     }
 }
 
-bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos)
+bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos, bool barrera_abierta, double pos_barrera)
 {
     bool rodeado[4] = {false, false, false, false};
     int pos_proximas[4][2] = {{posiciones[i][0]+v, posiciones[i][1]}, {posiciones[i][0]-v, posiciones[i][1]}, {posiciones[i][0], posiciones[i][1]+v}, {posiciones[i][0], posiciones[i][1]-v}};
@@ -213,6 +234,26 @@ bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos)
         }
     }
 
+    if (barrera_abierta == false)
+    {
+        if (posiciones[i][0]+1 < pos_barrera && pos_proximas[0][0]+1 > pos_barrera)
+        {
+            rodeado[0] = true;
+        }
+        else if (posiciones[i][0]+1 > pos_barrera && pos_proximas[0][0]+1 < pos_barrera)
+        {
+            rodeado[0] = true;
+        }
+        if (posiciones[i][0]+1 < pos_barrera && pos_proximas[1][0]+1 > pos_barrera)
+        {
+            rodeado[1] = true;
+        }
+        else if (posiciones[i][0]+1 > pos_barrera && pos_proximas[1][0]+1 < pos_barrera)
+        {
+            rodeado[1] = true;
+        }
+    }
+
     if (rodeado[0] && rodeado[1] && rodeado[2] && rodeado[3])
     {
         return true;
@@ -233,4 +274,98 @@ int suma_array(int array[], int n)
     }
 
     return suma;
+}
+
+double posicion_barrera(int N)
+{
+    if (N%2 == 0)
+    {
+        return (N/2)+0.5;
+    }
+    else
+    {
+        return (1.0*N/2);
+    }
+}
+
+// Función hecha solo para tipos = 2.
+bool barrera(int posiciones[][2], int N[2], int num[], double pos_barrera, int v[], int izqda)
+{
+    int contador;
+    bool izquierda;
+    int cont;
+    double distancia;
+
+    cont = 0;
+    contador = 0;
+
+    for (int j=0; j<2; j++)
+    {
+        if (j == izqda)
+        {
+            izquierda = true;
+        }
+        else
+        {
+            izquierda = false;
+        }
+        
+        for (int i = cont; i < suma_array(num,j+1); i++)
+        {
+            
+            distancia = posiciones[i][0] + 1 - pos_barrera;
+
+            if(izquierda)
+            {
+                if( (distancia < v[j]) && (distancia > 0) )
+                {
+                    contador++;
+                }
+                else if( (distancia > -v[j]) && (distancia < 0) ) 
+                {
+                    contador--;
+                }
+            }
+            else
+            {
+                if( (distancia < v[j]) && (distancia > 0) )
+                {
+                    contador--;
+                }
+                else if( (distancia > -v[j]) && (distancia < 0) )
+                {
+                    contador++;
+                }
+            }
+            //cout << contador << endl;
+            cont = suma_array(num,j+1);
+            
+        }
+    }
+    //cout << endl;
+    if (contador > 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+// Función hecha solo para tipos = 2.
+bool demonio(int posicion_vieja, int posicion_nueva, double pos_barrera)
+{
+    if( (posicion_vieja+1 < pos_barrera) && (posicion_nueva+1 > pos_barrera) )
+    {
+        return true;
+    }
+    else if( (posicion_vieja+1 > pos_barrera) && (posicion_nueva+1 < pos_barrera) )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
