@@ -24,7 +24,7 @@ int main()
     N[0] = 100; // Número de celdas horizontales
     N[1] = 100; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
-    num_pasos = 5000; // Número de pasos
+    num_pasos = 2000; // Número de pasos
 
     int num[tipos], v[tipos];
     double pos_barrera;
@@ -36,7 +36,7 @@ int main()
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 10; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 20; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -75,7 +75,7 @@ int main()
 
     inicializar_posiciones(posiciones, N, num, tipos, datos_posiciones);
 
-    for (int i = 0; i < num_pasos; i++)
+    for (int i = 1; i < num_pasos; i++)
     {
         for (int j = 0; j < tipos; j++)
         {
