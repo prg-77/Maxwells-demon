@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Circle
 import numpy as np
+import matplotlib.ticker as ticker
 import os 
 
 
@@ -77,7 +78,7 @@ print(positions_data[1][0])
 
 nparts = np.sum(num)
 
-radius = [0.2, 0.4]
+radius = [1.75, 2.5]
 part_radius = []
 colours = ['red', 'blue']
 part_colours = []
@@ -107,6 +108,10 @@ fig, ax = plt.subplots()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
+
+ax.xaxis.set_major_locator(ticker.MultipleLocator(N[0]/10))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(N[0]/10))
+ax.vlines(x=N[0]/2, ymin=y_min, ymax=y_max, linewidth=2, colors='black')
 
 #Obtenemos las posiciones iniciales de cada partícula
 part_points = []
