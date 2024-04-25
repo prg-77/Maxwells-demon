@@ -46,11 +46,11 @@ int main()
     // v[1] = 2;
 
     int posiciones[suma_array(num,tipos)][2];
-    ofstream parametros_iniciales, datos_posiciones[tipos];
+    ofstream parametros_iniciales, datos_posiciones[tipos], barrera_abierta_fichero;
 
     parametros_iniciales.open("parametros_iniciales.dat");
 
-    parametros_iniciales << "#N1 N2 num_pasos";
+    parametros_iniciales << "#N1 N2 num_pasos pos_barrera";
 
     for (int i = 0; i < tipos; i++)
     {
@@ -59,7 +59,7 @@ int main()
 
     parametros_iniciales << endl;
 
-    parametros_iniciales << N[0] << " , " << N[1] << " , " << num_pasos;
+    parametros_iniciales << N[0] << " , " << N[1] << " , " << num_pasos << " , " << pos_barrera;
 
     for (int i = 0; i < tipos; i++)
     {
@@ -73,6 +73,8 @@ int main()
         datos_posiciones[i].open("posiciones" + to_string(i+1) + ".dat");
     }
 
+    barrera_abierta_fichero.open("barrera_abierta.dat");
+
     inicializar_posiciones(posiciones, N, num, tipos, datos_posiciones);
 
     for (int i = 1; i < num_pasos; i++)
@@ -82,8 +84,7 @@ int main()
             datos_posiciones[j] << endl;
         }
         barrera_abierta = barrera(posiciones, N, num, pos_barrera, v, 0);
-        cout << barrera_abierta << endl;
-        cout << endl;
+        barrera_abierta_fichero << barrera_abierta << endl;
         actualizar_posiciones(posiciones, N, num, v, tipos, datos_posiciones, barrera_abierta, pos_barrera);
     }
 
@@ -91,6 +92,9 @@ int main()
     {
         datos_posiciones[i].close();
     }
+
+    barrera_abierta_fichero.close();
+
     return 0;
 }
 
@@ -345,12 +349,12 @@ bool barrera(int posiciones[][2], int N[2], int num[], double pos_barrera, int v
     //cout << endl;
     if (contador > 0)
     {
-        return true;
+        return true; // Barrera abierta
     }
     else
     {
-        return false;
-    }
+        return false; // Barrera cerrada
+    } 
 }
 
 // Función hecha solo para tipos = 2.

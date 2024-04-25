@@ -18,18 +18,26 @@ def read_text_file(file_path):
         return f.read()
 
 filename_inicial = "parametros_iniciales.dat"
+filename_barrera = "barrera_abierta.dat"
 
 with open(filename_inicial, 'r') as f:
     f.readline()  # Ignora la primera línea
     line = f.readline()  # Lee la segunda línea
     params = line.split(',')  # Divide la línea en una lista de cadenas
 
+barrera_abierta = []
+with open(filename_barrera, 'r') as f:
+    for line in f.readlines():
+        barrera_abierta.append(int(line))  # Añade la posición de la barrera a la lista
+
+print(barrera_abierta)
+
 N = [0, 0]
 num = [0, 0] #Si hay más de dos tipos de partículas hay que cambiarlo
 v = [0, 0] #Si hay más de dos tipos de partículas hay que cambiarlo
 
 # Convierte cada cadena a un número y guarda el resultado en una variable
-N[0], N[1], num_pasos, num[0], v[0], num[1], v[1] = [int(param) for param in params]
+N[0], N[1], num_pasos, pos_barrera, num[0], v[0], num[1], v[1] = [float(param) if i == 3 else int(param) for i, param in enumerate(params)]
 
 filename = []
 archivos = []
@@ -48,7 +56,7 @@ y_max = N[1]+0.5
 N_iter = num_pasos
 
 #Tiempo entre fotogramas
-interval = 20
+interval = 400
 
 #Guardar en archivo de salida
 save_to_file = False 
@@ -111,7 +119,7 @@ ax.set_ylim(y_min, y_max)
 
 ax.xaxis.set_major_locator(ticker.MultipleLocator(N[0]/10))
 ax.yaxis.set_major_locator(ticker.MultipleLocator(N[0]/10))
-ax.vlines(x=N[0]/2, ymin=y_min, ymax=y_max, linewidth=2, colors='black')
+#ax.vlines(x=N[0]/2, ymin=y_min, ymax=y_max, linewidth=2, colors='black')
 
 #Obtenemos las posiciones iniciales de cada partícula
 part_points = []
@@ -123,11 +131,17 @@ for part_pos, radius, colour in zip(positions[0], part_radius, part_colours):
     part_points.append(part_point)
 
 #Función para actualizar las posiciones de cada partícula
-def update(j_frame, frames_data, part_points):
+def update(j_frame, frames_data, part_points, pos_barrera, nframes, barrera_abierta):
     for j_part, part_pos in enumerate(frames_data[j_frame]):
         x, y = part_pos
         part_points[j_part].center = (x, y)
-    return part_points
+    if (barrera_abierta[j_frame] == 1):
+        linea = ax.vlines(x=pos_barrera, ymin=y_min, ymax=y_max, linewidth=2, colors='white')
+        ax.add_artist(linea)
+    else:
+        linea = ax.vlines(x=pos_barrera, ymin=y_min, ymax=y_max, linewidth=2, colors='black')
+        ax.add_artist(linea)
+    return part_points + [linea]
     
 
 print(nframes)
@@ -139,8 +153,8 @@ def init_anim():
 if nframes > 1:
     animation = FuncAnimation(
             fig, update, init_func=init_anim,
-            fargs=(positions, part_points),
-            frames=len(positions_data[0]), blit=True, interval=interval)
+            fargs=(positions, part_points, pos_barrera, nframes, barrera_abierta),
+            frames=nframes, blit=True, interval=interval)
     # Muestra por pantalla o guarda según parámetros
     if save_to_file:
         animation.save("{}.mp4".format(file_out), dpi=dpi)
