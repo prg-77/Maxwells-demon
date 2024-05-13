@@ -1,3 +1,5 @@
+// Tengo que calcular el numero de particulas en la parte izquierda de la barrera para ver si el calculo de la entropia es correcto.
+
 #include <iostream>
 #include <numeric>
 #include <string>
@@ -15,18 +17,22 @@ int suma_array(int array[], int n);
 double posicion_barrera(int N);
 bool barrera(int posiciones[][2], int N[2], int num[], double pos_barrera, int v[], int izqda); // Función hecha solo para tipos = 2.
 bool demonio(int posicion_vieja, int posicion_nueva, double pos_barrera); // Función hecha solo para tipos = 2. 
+double log_prod(int N, int M);
+double log_factorial(int n);
+double entropy(int numA, int numB, int nA, int nB, int N[2]);
+void particulas_izquierda(int posiciones[][2], int N[2], int num[], double pos_barrera, int n_izq[]);
 
 int main()
 {
     int N[2], tipos, num_pasos;
     bool barrera_abierta;
 
-    N[0] = 100; // Número de celdas horizontales
-    N[1] = 100; // Número de celdas verticales
+    N[0] = 200; // Número de celdas horizontales
+    N[1] = 200; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
     num_pasos = 2000; // Número de pasos
 
-    int num[tipos], v[tipos];
+    int num[tipos], v[tipos], n_izq[tipos];
     double pos_barrera;
 
     pos_barrera = posicion_barrera(N[0]); //Posición de la barrera
@@ -36,7 +42,7 @@ int main()
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 20; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 150; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -77,6 +83,10 @@ int main()
 
     inicializar_posiciones(posiciones, N, num, tipos, datos_posiciones);
 
+    particulas_izquierda(posiciones, N, num, pos_barrera, n_izq);
+    cout << "Número de partículas de cada tipo en la parte izquierda de la barrera: " << n_izq[0] << " , " << n_izq[1] << endl << endl;
+    cout << "Entropía: " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl << endl;
+
     for (int i = 1; i < num_pasos; i++)
     {
         for (int j = 0; j < tipos; j++)
@@ -86,6 +96,14 @@ int main()
         barrera_abierta = barrera(posiciones, N, num, pos_barrera, v, 0);
         barrera_abierta_fichero << barrera_abierta << endl;
         actualizar_posiciones(posiciones, N, num, v, tipos, datos_posiciones, barrera_abierta, pos_barrera);
+
+        particulas_izquierda(posiciones, N, num, pos_barrera, n_izq);
+        if (i%100 == 0)
+        {
+            cout << "Número de partículas de cada tipo en la parte izquierda de la barrera: " << n_izq[0] << " , " << n_izq[1] << endl << endl;
+            cout << "Entropía: " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl << endl;
+        }
+
     }
 
     for (int i = 0; i < tipos; i++)
@@ -373,3 +391,65 @@ bool demonio(int posicion_vieja, int posicion_nueva, double pos_barrera)
         return false;
     }
 }
+
+// Función que calcula el logaritmo del producto (N*(N-1)*...*(N-M+1))
+
+double log_prod(int N, int M)
+{
+    double log_prod = 0;
+
+    for (int i = N; i > (N-M); i--)
+    {
+        log_prod += log(i);
+    }
+
+    return log_prod;
+}
+
+//Función que calcula el logaritmo de un factorial
+
+double log_factorial(int n)
+{
+    double log_fact = 0;
+
+    for (int i = 1; i <= n; i++)
+    {
+        log_fact += log(i);
+    }
+
+    return log_fact;
+}
+
+// nA y nB son el número de partículas de cada tipo en la parte izquierda de la barrera
+double entropy(int numA, int numB, int nA, int nB, int N[2]) 
+{
+    double entropia;
+
+    entropia = log_prod(N[0]*N[1]/2, nA+nB) + log_prod(N[0]*N[1]/2, numA+numB-nA-nB) - log_factorial(nA) - log_factorial(nB) - log_factorial(numA-nA) - log_factorial(numB-nB);
+
+    return entropia;
+}
+
+// Función que calcula el número de partículas de cada tipo en la parte izquierda de la barrera
+void particulas_izquierda(int posiciones[][2], int N[2], int num[2], double pos_barrera, int n_izq[2])
+{
+    for (int i = 0; i < 2; i++)
+    {
+        n_izq[i] = 0;
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        for (int cont=suma_array(num,i); cont < suma_array(num,i+1); cont++)
+        {
+            if (posiciones[cont][0]+1 < pos_barrera)
+            {
+                n_izq[i] += 1;
+            }
+        }
+    }
+
+    return;
+}
+
+

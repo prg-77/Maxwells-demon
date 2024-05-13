@@ -56,7 +56,7 @@ y_max = N[1]+0.5
 N_iter = num_pasos
 
 #Tiempo entre fotogramas
-interval = 400
+interval = 10
 
 #Guardar en archivo de salida
 save_to_file = False 
