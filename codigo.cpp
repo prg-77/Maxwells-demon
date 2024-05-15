@@ -1,5 +1,3 @@
-// Tengo que calcular el numero de particulas en la parte izquierda de la barrera para ver si el calculo de la entropia es correcto.
-
 #include <iostream>
 #include <numeric>
 #include <string>
@@ -11,7 +9,7 @@
 using namespace std;
 
 void inicializar_posiciones(int posiciones[][2], int N[2], int num[], int tipos, ofstream* datos_posiciones);
-void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera);
+void actualizar_posiciones(int posiciones[][2], int posiciones_viejas[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera);
 bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos, bool barrera_abierta, double pos_barrera);
 int suma_array(int array[], int n);
 double posicion_barrera(int N);
@@ -21,28 +19,31 @@ double log_prod(int N, int M);
 double log_factorial(int n);
 double entropy(int numA, int numB, int nA, int nB, int N[2]);
 void particulas_izquierda(int posiciones[][2], int N[2], int num[], double pos_barrera, int n_izq[]);
+void calculo_presion(int posiciones[][2], int posiciones_viejas[][2], int num[2], int N[2], double pos_barrera, double presion[2]);
 
 int main()
 {
     int N[2], tipos, num_pasos;
     bool barrera_abierta;
 
-    N[0] = 200; // Número de celdas horizontales
-    N[1] = 200; // Número de celdas verticales
+    N[0] = 20; // Número de celdas horizontales
+    N[1] = 20; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
-    num_pasos = 2000; // Número de pasos
+    num_pasos = 200000; // Número de pasos
 
     int num[tipos], v[tipos], n_izq[tipos];
-    double pos_barrera;
+    double pos_barrera, presion[tipos], presion_sumada[tipos];
 
     pos_barrera = posicion_barrera(N[0]); //Posición de la barrera
     cout << pos_barrera << endl;
     cout << endl;
 
+    presion_sumada[0] = presion_sumada[1] = 0;
+
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 150; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 10; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -51,8 +52,8 @@ int main()
     // v[0] = 1;
     // v[1] = 2;
 
-    int posiciones[suma_array(num,tipos)][2];
-    ofstream parametros_iniciales, datos_posiciones[tipos], barrera_abierta_fichero;
+    int posiciones[suma_array(num,tipos)][2], posiciones_viejas[suma_array(num,tipos)][2];
+    ofstream parametros_iniciales, datos_posiciones[tipos], barrera_abierta_fichero, entropia_fichero, presion_fichero;
 
     parametros_iniciales.open("parametros_iniciales.dat");
 
@@ -80,12 +81,15 @@ int main()
     }
 
     barrera_abierta_fichero.open("barrera_abierta.dat");
+    entropia_fichero.open("entropia.dat");
+    presion_fichero.open("presion.dat");
 
     inicializar_posiciones(posiciones, N, num, tipos, datos_posiciones);
 
     particulas_izquierda(posiciones, N, num, pos_barrera, n_izq);
-    cout << "Número de partículas de cada tipo en la parte izquierda de la barrera: " << n_izq[0] << " , " << n_izq[1] << endl << endl;
-    cout << "Entropía: " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl << endl;
+    entropia_fichero <<  "# Paso   nA   nB   Entropía" << endl;
+    entropia_fichero << 0 << " , " << n_izq[0] << " , " << n_izq[1] << " , " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl;
+    presion_fichero << "# Paso   Presión Izq   Presión Dcha" << endl;
 
     for (int i = 1; i < num_pasos; i++)
     {
@@ -95,13 +99,17 @@ int main()
         }
         barrera_abierta = barrera(posiciones, N, num, pos_barrera, v, 0);
         barrera_abierta_fichero << barrera_abierta << endl;
-        actualizar_posiciones(posiciones, N, num, v, tipos, datos_posiciones, barrera_abierta, pos_barrera);
-
+        actualizar_posiciones(posiciones, posiciones_viejas, N, num, v, tipos, datos_posiciones, barrera_abierta, pos_barrera);
+        calculo_presion(posiciones, posiciones_viejas, num, N, pos_barrera, presion);
+        presion_sumada[0] += presion[0];    
+        presion_sumada[1] += presion[1];
+ 
         particulas_izquierda(posiciones, N, num, pos_barrera, n_izq);
-        if (i%100 == 0)
+        if (i%10000 == 0)
         {
-            cout << "Número de partículas de cada tipo en la parte izquierda de la barrera: " << n_izq[0] << " , " << n_izq[1] << endl << endl;
-            cout << "Entropía: " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl << endl;
+            entropia_fichero << i << " , " << n_izq[0] << " , " << n_izq[1] << " , " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl;
+            presion_fichero << i << " , " << presion_sumada[0] << " , " << presion_sumada[1] << endl;
+            presion_sumada[0] = presion_sumada[1] = 0;
         }
 
     }
@@ -112,6 +120,8 @@ int main()
     }
 
     barrera_abierta_fichero.close();
+    entropia_fichero.close();
+    presion_fichero.close();
 
     return 0;
 }
@@ -153,7 +163,7 @@ void inicializar_posiciones(int posiciones[][2], int N[2], int num[], int tipos,
     }
 }
 
-void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera)
+void actualizar_posiciones(int posiciones[][2], int posiciones_viejas[][2], int N[2], int num[], int v[], int tipos, ofstream* datos_posiciones, bool barrera_abierta, double pos_barrera)
 {
     double r, posiciones_aux[2];
     bool ocupado;
@@ -223,6 +233,8 @@ void actualizar_posiciones(int posiciones[][2], int N[2], int num[], int v[], in
                     }
                 }  
             }
+            posiciones_viejas[i][0] = posiciones[i][0];
+            posiciones_viejas[i][1] = posiciones[i][1];
             posiciones[i][0] = posiciones_aux[0];
             posiciones[i][1] = posiciones_aux[1];
             datos_posiciones[j] << posiciones[i][0]+1 << " , " << posiciones[i][1]+1 << endl;
@@ -407,7 +419,6 @@ double log_prod(int N, int M)
 }
 
 //Función que calcula el logaritmo de un factorial
-
 double log_factorial(int n)
 {
     double log_fact = 0;
@@ -452,4 +463,71 @@ void particulas_izquierda(int posiciones[][2], int N[2], int num[2], double pos_
     return;
 }
 
+// Función que calcula la presión 
+
+void calculo_presion(int posiciones[][2], int posiciones_viejas[][2], int num[2], int N[2], double pos_barrera, double presion[2])
+{
+    presion[0] = 0;
+    presion[1] = 0;
+
+    for (int i=0; i < num[0]+num[1]; i++)
+    {
+        if(posiciones[i][0] == 0)
+        {
+            if (posiciones_viejas[i][0] != 0)
+            {
+                presion[0] += 1;
+            }
+        }
+        else if(posiciones[i][0] == N[0]-1)
+        {
+            if (posiciones_viejas[i][0] != N[0]-1)
+            {
+                presion[1] += 1;
+            }
+        }
+        else if(posiciones[i][1] == 0)
+        {
+            if (posiciones_viejas[i][1] != 0)
+            {
+                if (posiciones[i][0]+1 < pos_barrera)
+                {
+                    presion[0] += 1;
+                }
+                else
+                {
+                    presion[1] += 1;
+                }
+            }
+        }
+        else if(posiciones[i][1] == N[1]-1)
+        {
+            if (posiciones_viejas[i][1] != N[1]-1)
+            {
+                if (posiciones[i][0]+1 < pos_barrera)
+                {
+                    presion[0] += 1;
+                }
+                else
+                {
+                    presion[1] += 1;
+                }
+            }
+        }
+        else if(posiciones[i][0]+1 == floor(pos_barrera))
+        {
+            if (posiciones_viejas[i][0] < posiciones[i][0])
+            {
+                presion[0] += 1;
+            }
+        }
+        else if(posiciones[i][0]+1 == ceil(pos_barrera))
+        {
+            if (posiciones_viejas[i][0] > posiciones[i][0])
+            {
+                presion[1] += 1;
+            }
+        }
+    }
+}
 
