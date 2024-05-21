@@ -26,4 +26,5 @@ ax.yaxis.set_major_locator(ticker.MultipleLocator((entropia['Entropia'].max() - 
 ax.yaxis.set_minor_locator(ticker.MultipleLocator((entropia['Entropia'].max() - entropia['Entropia'].min()) / 20))
 
 plt.legend()
+plt.savefig('entropia_sin_demonio.png')
 plt.show()

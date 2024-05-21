@@ -29,4 +29,5 @@ ax.yaxis.set_major_locator(ticker.MultipleLocator((presion['Izd'].max() - presio
 ax.yaxis.set_minor_locator(ticker.MultipleLocator((presion['Izd'].max() - presion['Der'].min()) / 20))
 
 plt.legend(loc='upper left')
+plt.savefig('presion_sin_demonio.png')
 plt.show()
