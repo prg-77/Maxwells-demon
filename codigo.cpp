@@ -26,10 +26,10 @@ int main()
     int N[2], tipos, num_pasos;
     bool barrera_abierta;
 
-    N[0] = 20; // Número de celdas horizontales
-    N[1] = 20; // Número de celdas verticales
+    N[0] = 100; // Número de celdas horizontales
+    N[1] = 100; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
-    num_pasos = 200000; // Número de pasos
+    num_pasos = 42000; // Número de pasos
 
     int num[tipos], v[tipos], n_izq[tipos];
     double pos_barrera, presion[tipos], presion_sumada[tipos];
@@ -43,7 +43,7 @@ int main()
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 10; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 100; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -105,7 +105,7 @@ int main()
         presion_sumada[1] += presion[1];
  
         particulas_izquierda(posiciones, N, num, pos_barrera, n_izq);
-        if (i%10000 == 0)
+        if (i%2000 == 0)
         {
             entropia_fichero << i << " , " << n_izq[0] << " , " << n_izq[1] << " , " << entropy(num[0], num[1], n_izq[0], n_izq[1], N) << endl;
             presion_fichero << i << " , " << presion_sumada[0] << " , " << presion_sumada[1] << endl;
