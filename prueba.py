@@ -56,10 +56,10 @@ y_max = N[1]+0.5
 N_iter = num_pasos
 
 #Tiempo entre fotogramas
-interval = 10
+interval = 150
 
 #Guardar en archivo de salida
-save_to_file = False 
+save_to_file = True 
 
 #Calidad
 dpi = 150
@@ -86,7 +86,7 @@ print(positions_data[1][0])
 
 nparts = np.sum(num)
 
-radius = [1.75, 2.5]
+radius = [0.2, 0.4]
 part_radius = []
 colours = ['red', 'blue']
 part_colours = []
