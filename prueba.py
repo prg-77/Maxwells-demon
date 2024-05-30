@@ -37,7 +37,7 @@ num = [0, 0] #Si hay más de dos tipos de partículas hay que cambiarlo
 v = [0, 0] #Si hay más de dos tipos de partículas hay que cambiarlo
 
 # Convierte cada cadena a un número y guarda el resultado en una variable
-N[0], N[1], num_pasos, pos_barrera, num[0], v[0], num[1], v[1] = [float(param) if i == 3 else int(param) for i, param in enumerate(params)]
+N[0], N[1], num_pasos, rep, pos_barrera, num[0], v[0], num[1], v[1] = [float(param) if i == 4 else int(param) for i, param in enumerate(params)]
 
 filename = []
 archivos = []
@@ -59,7 +59,7 @@ N_iter = num_pasos
 interval = 150
 
 #Guardar en archivo de salida
-save_to_file = True 
+save_to_file = False 
 
 #Calidad
 dpi = 150

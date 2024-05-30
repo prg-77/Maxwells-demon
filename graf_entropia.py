@@ -6,18 +6,19 @@ import pandas as pd
 entropia = pd.read_csv('entropia.dat', header=None, comment='#') # Con demonio
 entropia_sin_demonio = pd.read_csv('entropia_sin_demonio.dat', header=None, comment='#')   # Sin demonio
 
-entropia = entropia.rename(columns={0: 'Paso', 1: 'nA', 2 : 'nB', 3 : 'Entropia'})
+entropia = entropia.rename(columns={0: 'Paso', 1: 'Entropia', 2 : 'Error'})
 entropia_sin_demonio = entropia_sin_demonio.rename(columns={0: 'Paso', 1: 'nA', 2 : 'nB', 3 : 'Entropia'})
 
 #print(entropia)
 
 fig, ax = plt.subplots()
 
-ax.plot(entropia['Paso'], entropia['Entropia'], color='tab:blue')
-ax.scatter(entropia['Paso'], entropia['Entropia'], color='tab:blue', label= 'With demon')
+ax.errorbar(entropia['Paso'], entropia['Entropia'], yerr=entropia['Error'], color='tab:blue', label='With demon', capsize=5, capthick=2, fmt='o-')
+#ax.plot(entropia['Paso'], entropia['Entropia'], color='tab:blue')
+#ax.scatter(entropia['Paso'], entropia['Entropia'], color='tab:blue', label= 'With demon')
 
-ax.plot(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red')
-ax.scatter(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red', label=' Without demon')
+#ax.plot(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red')
+#ax.scatter(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red', label=' Without demon')
 
 ax.grid(True)
 ax.set_xlabel('Step')
