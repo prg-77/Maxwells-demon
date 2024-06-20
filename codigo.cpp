@@ -31,7 +31,7 @@ int main()
     tipos = 2; // Número de tipos de partículas
     num_pasos = 20000; // Número de pasos
     rep = 100; // Número de repeticiones
-    video = false; // si es true, se guardan los datos de la primera simulación para hacer un video, si es false, no se guardan
+    video = true; // si es true, se guardan los datos de la primera simulación para hacer un video, si es false, no se guardan
     intervalo = 1000; // Intervalo de tiempo para calcular la entropía y la presión
     numero_puntos = num_pasos/intervalo; // Número de puntos para calcular la entropía
     hay_demonio = true; // Si es true, hay demonio, si es false, no hay demonio

@@ -22,17 +22,6 @@ ax.errorbar(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], yerr
 #ax.plot(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red')
 #ax.scatter(entropia_sin_demonio['Paso'], entropia_sin_demonio['Entropia'], color='tab:red', label=' Without demon')
 
-'''
-def exponential_decay(x, a, b, c):
-    return a * np.exp(-b * x) + c
-
-popt, pcov = curve_fit(exponential_decay, entropia['Paso'],entropia['Entropia'] , bounds=(0, [300, 1, 255]))
-a, b, c = popt
-print(f"Ajuste de parámetros: a={a}, b={b}, c={c}")
-
-plt.plot(range(1,20000), exponential_decay(range(1,20000), *popt), color='green', label="Ajuste ") # Dibujar ajuste
-'''
-
 size = 10
 
 ax.grid(True)
