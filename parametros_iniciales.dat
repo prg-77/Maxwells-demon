@@ -1,2 +1,2 @@
 #N1 N2 num_pasos repeticiones pos_barrera num1 v1 num2 v2
-30 , 30 , 20000 , 60 , 15.5 , 10 , 1 , 10 , 2
+15 , 15 , 20000 , 100 , 7.5 , 20 , 1 , 20 , 2

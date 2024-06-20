@@ -26,11 +26,11 @@ int main()
     int N[2], tipos, num_pasos, rep, intervalo, numero_puntos;
     bool barrera_abierta, video, hay_demonio;
 
-    N[0] = 30; // Número de celdas horizontales
-    N[1] = 30; // Número de celdas verticales
+    N[0] = 15; // Número de celdas horizontales
+    N[1] = 15; // Número de celdas verticales
     tipos = 2; // Número de tipos de partículas
     num_pasos = 20000; // Número de pasos
-    rep = 60; // Número de repeticiones
+    rep = 100; // Número de repeticiones
     video = false; // si es true, se guardan los datos de la primera simulación para hacer un video, si es false, no se guardan
     intervalo = 1000; // Intervalo de tiempo para calcular la entropía y la presión
     numero_puntos = num_pasos/intervalo; // Número de puntos para calcular la entropía
@@ -49,7 +49,7 @@ int main()
     // Si queremos el mismo número de partículas de cada tipo y velocidades ascendentes
     for (int i = 0; i < tipos; i++)
     {
-        num[i] = 10; // Número de partículas de cada tipo [num1, num2, ...]
+        num[i] = 20; // Número de partículas de cada tipo [num1, num2, ...]
         v[i] = i+1; // Velocidad de las partículas de cada tipo [v1, v2, ...]
     }
     // Si queremos un número de partículas y velocidades diferentes para cada tipo
@@ -387,27 +387,14 @@ bool rodeado(int posiciones[][2], int N[2], int num[], int i, int v, int tipos, 
         }
     }
 
-    if(v==1)
+    
+    if (esta_rodeado[0] && esta_rodeado[1] && esta_rodeado[2] && esta_rodeado[3])
     {
-        if (esta_rodeado[0] && esta_rodeado[1] && esta_rodeado[2] && esta_rodeado[3])
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return true;
     }
     else
     {
-        if (esta_rodeado[0] && esta_rodeado[1] && esta_rodeado[2] && esta_rodeado[3])
-        {
-            return true;
-        }
-        else
-        {
-            return rodeado(posiciones, N, num, i, 1, tipos, barrera_abierta, pos_barrera);
-        }
+        return false;
     }
 }
 
